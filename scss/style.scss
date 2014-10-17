@@ -1,0 +1,32 @@
+// Uncomment this to put a red border around everything; helps with debugging.
+// * {
+//   border: 1px solid red;
+// }
+
+
+//
+// reset
+//
+
+body, div, header, footer, section, article, h1, menu, menuitem {
+  margin: 0;
+  padding: 0;
+}
+
+
+//
+// general
+//
+
+h1, h2, h3, h4, h5, menuitem, footer {
+  font-family: 'Lucida Console', sans-serif;
+}
+
+body {
+  background-color: #444;
+  font-family: Georgia, serif;
+}
+
+main {
+  background-color: white;
+}
