@@ -18,16 +18,11 @@ body, div, header, footer, section, article, h1, menu, menuitem {
 // general
 //
 
-h1, h2, h3, h4, h5, menuitem, footer {
+h1, h2, h3, h4, h5, menuitem {
   font-family: 'Lucida Console', sans-serif;
 }
 
 body {
-  color: white;
-  background-color: #444;
+  // background-color: #444;
   font-family: Georgia, serif;
-}
-
-main {
-  background-color: white;
 }
