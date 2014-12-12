@@ -67,8 +67,7 @@
             <h1>Developer Guide</h1>
             <ul>
               <li><a href='#Source Installation'>Source Installation</a></li>
-              <li><a href='#Directories and Files'>Directories and Files</a></li>
-              <li><a href='#Classes'>Classes</a></li>
+              <li><a href='#Source Overview'>Source Overview</a></li>
               <li><a href='#Adding a Product'>Adding a Product</a></li>
               <li>
                 <a href='#API Reference'>API Reference</a>
@@ -602,8 +601,18 @@ end
               (v1.11.6), the Python environment manager.
             </p>
 <pre>
+PROJECT_VM_DIR = '/Users/vagrant/Documents/...'
+PROJECT_GITHUB_URL = 'https://https://github.com/...'
+...
 with vagrant_config do
+  install_git
+  install_python3
   <b>install_virtualenv</b>
+  git_clone PROJECT_GITHUB_URL, PROJECT_VM_DIR
+  cd PROJECT_VM_DIR do
+    virtualenv_create
+    pip_install
+  end
 end
 </pre>
           </article>
@@ -638,8 +647,8 @@ end
           <article>
             <h3><a id='pip_install'>pip_install</a></h3>
             <p>
-              Run <i>pip install</i>.  <a href='#install_python3'>Python</a>
-              must be installed beforehand.
+              Runs <i>pip install --requirements.txt</i>. <a
+              href='#install_python3'>Python</a> must be installed beforehand.
             </p>
             <p>
               You would typically install the project sources and then run pip
@@ -648,14 +657,16 @@ end
               to change to the project directory directory first:
             </p>
 <pre>
-PROJECT_GITHUB_URL = 'https://https://github.com/...'
 PROJECT_VM_DIR = '/Users/vagrant/Documents/...'
+PROJECT_GITHUB_URL = 'https://https://github.com/...'
 ...
 with vagrant_config do
   install_git
   install_python3
+  install_virtualenv
   git_clone PROJECT_GITHUB_URL, PROJECT_VM_DIR
   cd PROJECT_VM_DIR do
+    virtualenv_create
     <b>pip_install</b>
   end
 end
@@ -665,9 +676,8 @@ end
           <article>
             <h3><a id='reboot_vm'>reboot_vm</a></h3>
             <p>
-              Reboot the virtual machine.  This can be a useful last
-              provisioning step to ensure that the virtual machine
-              boots properly, etc.
+              Reboots the virtual machine.  This may be useful on some operating
+              systems after installing software.
             </p>
 <pre>
 with vagrant_config do
@@ -683,32 +693,96 @@ end
           <article>
             <h3><a id='virtualenv_create'>virtualenv_create</a></h3>
             <p>
-              Use virtualenv to create a python3 <i>env</i> environment.
+              Runs <i>virtualenv --no-site-packages --python=which python3 env</i>.
               <a href='#install_virtualenv'>virtualenv</a> must be installed
               beforehand.
             </p>
+            <p>
+              You would typically install the project sources and then run
+              virtualenv to create a new python environment in the project
+              directory.
+            </p>
 <pre>
+PROJECT_VM_DIR = '/Users/vagrant/Documents/...'
+PROJECT_GITHUB_URL = 'https://https://github.com/...'
+...
 with vagrant_config do
+  install_git
+  install_python3
   install_virtualenv
-  <b>virtualenv_create</b>
+  git_clone PROJECT_GITHUB_URL, PROJECT_VM_DIR
+  cd PROJECT_VM_DIR do
+    <b>virtualenv_create</b>
+    pip_install
+  end
 end
 </pre>
           </article>
 
           <article>
             <h2><a id='Source Installation'>Source Installation</a></h2>
-            <p>
-            </p>
+<pre>
+$ git clone https://github.com/milewdev/vm-provisioner.git ~/work/vm-provisioner
+</pre>
           </article>
 
           <article>
-            <h2><a id='Directories and Files'>Directories and Files</a></h2>
+            <h2><a id='Source Overview'>Source Overview</a></h2>
             <p>
+              The source consists of one class, Provisioner, defined in the file
+              Provisioner.rb.  There are a large number of methods but they are
+              very repetitive and there is not yet the incentive to break them
+              out into smaller classes.
             </p>
-          </article>
+            <p>
+              A Vagrantfile will bootstrap vm-provisioner by downloading
+              Provisioner.rb from github and then invoking the <a
+              href='https://github.com/milewdev/vm-provisioner/blob/v2/Provisioner.rb#L6'>Provisioner.provision</a>
+              class method, i.e. the code entry point:
+            </p>
+<pre>
+PROVISIONER_URL = "https://raw.githubusercontent.com/milewdev/vm-provisioner/v2/Provisioner.rb"
+...
+Vagrant.configure(API_VERSION) do |vagrant_config|
+  ...
+  with vagrant_config do
+    ...
+  end
+end
 
-          <article>
-            <h2><a id='Classes'>Classes</a></h2>
+
+def with(vagrant_config, &block)
+  require "open-uri"
+  <b>File.write "Provisioner.rb", open(PROVISIONER_URL).read</b>
+  require_relative "Provisioner"
+  <b>Provisioner.provision(vagrant_config, &block)</b>
+  File.delete "Provisioner.rb"
+end
+</pre>
+            <p>
+              Note that the URL references branch v2 rather than master:
+            </p>
+<pre>
+PROVISIONER_URL = "https:// ... /vm-provisioner/<b>v2</b>/Provisioner.rb"
+</pre>
+            <p>
+              Interface-breaking changes to vm-provisioner should be stored in
+              github in their own branch so as not to break existing
+              Vagrantfiles.
+            </p>
+            <p>
+              Although there is only the one Provisioner class, it has been
+              divided into three parts, the <a
+              href='https://github.com/milewdev/vm-provisioner/blob/v2/Provisioner.rb#L4-L21'>first</a>
+              for initialization and launch (where Provisioner.provision is
+              defined), the <a
+              href='https://github.com/milewdev/vm-provisioner/blob/v2/Provisioner.rb#L27-L87'>second</a>
+              containing the provisioning utilities called from a Vagrantfile,
+              for example install_git and reboot_vm, and the <a
+              href='https://github.com/milewdev/vm-provisioner/blob/v2/Provisioner.rb#L93-L298'>last</a>
+              containing API methods used in the implementations of the
+              utilities, for instance dmg_install and copy_host_file_to_vm.
+            </p>
             <p>
             </p>
           </article>
@@ -716,6 +790,73 @@ end
           <article>
             <h2><a id='Adding a Product'>Adding a Product</a></h2>
             <p>
+              Adding a product will usually involve adding an install_something
+              method to the second part of the Provisioner class:
+            </p>
+<pre>
+class Provisioner
+  ...
+  def install_atom
+    say "Installing atom editor"
+    zip_install 'https://atom.io/download/mac'
+  end
+  ...
+end
+</pre>
+            <p>
+              Sometimes a little more work is required:
+            </p>
+<pre>
+class Provisioner
+  ...
+  def install_postgresql(version = nil)
+    version ||= ''                        # blank version defaults to latest version
+    say "Installing PostgreSQL"
+    run_script <<-"EOF"
+       brew install postgresql#{version}
+       rm -rf /usr/local/var/postgres/
+       initdb /usr/local/var/postgres -E UTF8
+       mkdir -p ~/Library/LaunchAgents
+       ln -sfv /usr/local/opt/postgresql92/*.plist ~/Library/LaunchAgents
+    EOF
+  end
+  ...
+end
+</pre>
+            <p>
+              The <i>say</i> method prints a header line in the terminal window
+              where Vagrant is run from.  This simply helps to delimit one
+              provisioning step from another which can be helpful when debugging
+              errors, slow downloads, etc.
+            </p>
+<pre>
+...
+<b>--------------- Installing atom editor ---------------</b>
+[default] Running provisioner: shell...
+[default] Running: inline script
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   389  100   389    0     0    396      0 --:--:-- --:--:-- --:--:--   396
+100 65.7M  100 65.7M    0     0  1122k      0  0:00:59  0:00:59 --:--:-- 1058k
+[default] Running provisioner: shell...
+[default] Running: inline script
+<b>--------------- Installing iTerm2 ---------------</b>
+[default] Running provisioner: shell...
+[default] Running: inline script
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 3111k  100 3111k    0     0   880k      0  0:00:03  0:00:03 --:--:--  880k
+[default] Running provisioner: shell...
+[default] Running: inline script
+...
+</pre>
+            <p>
+              The <a href='#API Reference'>API Reference</a> contains a list of
+              methods that can help to write an installer, such as zip_install,
+              run_script, etc. Add additional helper methods, if required, or
+              enhance the existing ones.  Note: if you introduce a change that
+              would break existing Vagrantfiles then create a new branch in
+              github, e.g. v3, to contain the enhancements.
             </p>
           </article>
 
