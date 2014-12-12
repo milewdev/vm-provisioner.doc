@@ -1,9 +1,137 @@
-body, div, header, footer, section, article, h1, menu, menuitem {
+@import url(http://fonts.googleapis.com/css?family=Lato|Roboto+Slab:300&subset=latin,latin-ext);
+* {
   margin: 0;
   padding: 0; }
 
-h1, h2, h3, h4, h5, menuitem {
-  font-family: 'Lucida Console', sans-serif; }
+html {
+  box-sizing: border-box; }
+
+*, *:before, *:after {
+  box-sizing: inherit; }
+
+body > header {
+  background-color: #abc;
+  padding: 0 2em; }
+  body > header nav {
+    height: 2.6em;
+    margin: 0 auto 1em auto;
+    max-width: 58em;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+            justify-content: space-between; }
+  body > header menu {
+    margin: auto 0; }
+  body > header menuitem {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 1px; }
+    body > header menuitem a {
+      color: inherit;
+      text-decoration: none; }
+      body > header menuitem a:hover {
+        text-decoration: underline; }
+    body > header menuitem + menuitem {
+      margin-left: 0.8em; }
+
+body > footer {
+  clear: left;
+  display: block;
+  padding: 2em 2em 1em 2em;
+  text-align: center; }
+  body > footer section {
+    margin: 0 auto;
+    max-width: 58em;
+    border-top: 1px solid #ccc;
+    padding-top: 0.5em; }
+    body > footer section p {
+      color: #999;
+      font-size: 0.7em; }
+
+a {
+  color: #69f;
+  text-decoration: none; }
+  a:hover {
+    text-decoration: underline; }
+
+.lr-crumple-zone {
+  margin: 0 auto;
+  max-width: 62em; }
+
+.lr-crumple-zone-inner {
+  padding: 0 2em; }
 
 body {
-  font-family: Georgia, serif; }
+  font-family: 'Roboto Slab', serif;
+  font-weight: 300; }
+
+section.index {
+  display: block;
+  float: left;
+  width: 240px;
+  padding: 0.5em 2em 0 0; }
+  section.index h1 {
+    font-size: 0.9em;
+    margin-bottom: 0.5em; }
+  section.index ul {
+    list-style-type: none; }
+  section.index ul ul {
+    margin-left: 0.8em; }
+  section.index nav + nav {
+    margin-top: 2em; }
+  section.index a[href='#install_osx_command_line_tools_mountain_lion'],
+  section.index a[href='#install_osx_command_line_tools_mavericks'] {
+    text-decoration: line-through; }
+  section.index a {
+    color: black;
+    font-size: 0.75em;
+    text-decoration: none; }
+    section.index a:hover {
+      color: #66f;
+      text-decoration: underline; }
+
+section.main {
+  display: block;
+  overflow: hidden; }
+  section.main article + article {
+    margin-top: 3em; }
+  section.main h1 {
+    color: #abc;
+    font-size: 2.5em;
+    margin: 0.8em 0 0.4em 0;
+    text-align: center; }
+  section.main h2 {
+    color: #abc;
+    font-size: 1.6em; }
+  section.main h3 {
+    font-size: 1.2em; }
+  section.main h2 + h3 {
+    margin-top: 0.5em; }
+  section.main a {
+    color: inherit;
+    text-decoration: none; }
+  section.main a[href] {
+    color: #66f;
+    text-decoration: none; }
+    section.main a[href]:hover {
+      text-decoration: underline; }
+  section.main p {
+    margin: 0.5em 0 0.5em 0; }
+  section.main .tagline {
+    font-style: italic;
+    text-align: center; }
+  section.main pre {
+    border: 1px solid #abc;
+    font-family: 'Courier New';
+    font-size: 0.85em;
+    overflow: auto;
+    margin: 1.2em 0;
+    padding: 0.6em 0.8em; }
+  section.main ul, section.main ol {
+    padding-left: 2em; }
+  section.main li {
+    margin: 0.25em 0; }

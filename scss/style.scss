@@ -1,28 +1,143 @@
-// Uncomment this to put a red border around everything; helps with debugging.
-// * {
-//   border: 1px solid red;
-// }
+@import 'library';
 
-
-//
-// reset
-//
-
-body, div, header, footer, section, article, h1, menu, menuitem {
-  margin: 0;
-  padding: 0;
-}
-
-
-//
-// general
-//
-
-h1, h2, h3, h4, h5, menuitem {
-  font-family: 'Lucida Console', sans-serif;
-}
+@include reset;
+@include box-sizing-fix;
+@include main-header;
+@include main-footer;
+@include link-style;
+@include lr-crumple-zone;
+// @include debug-show-all-borders;
 
 body {
-  // background-color: #444;
-  font-family: Georgia, serif;
+  font-family: 'Roboto Slab', serif;
+  font-weight: 300;
+}
+
+
+//
+// constants
+//
+$body-width: 960px;
+$index-width: 240px;
+$main-width: $body-width - $index-width - 2px;
+
+
+section.index {
+  display: block;
+  float: left;
+  width: $index-width;
+
+  // Bump the index down a bit (margin-top) so
+  // that the first header ('User Guide') looks
+  // in line with the first header ('Overview')
+  // of the main content.
+  // Have to use padding here because margin
+  // breaks the width setting somehome.
+  padding: 0.5em 2em 0 0;      // t r b l
+
+  h1 {
+    font-size: 0.9em;
+    margin-bottom: 0.5em;
+  }
+
+  ul {
+    list-style-type: none;
+  }
+
+  // Indent 2nd level list.
+  ul ul {
+    margin-left: 0.8em;
+  }
+
+  // Extra space between top-level lists.
+  nav + nav {
+    margin-top: 2em;
+  }
+
+  a[href='#install_osx_command_line_tools_mountain_lion'],
+  a[href='#install_osx_command_line_tools_mavericks'],
+  {
+    text-decoration: line-through;
+  }
+
+  a {
+    color: black;
+    font-size: 0.75em;
+    text-decoration: none;
+
+    &:hover {
+      color: #66f;
+      text-decoration: underline;
+    }
+  }
+}
+
+section.main {
+  display: block;
+  overflow: hidden;
+
+  // Nice gap between articles.
+  article + article {
+    margin-top: 3em;
+  }
+
+  h1 {
+    color: $main-header-background-color;
+    font-size: 2.5em;
+    margin: 0.8em 0 0.4em 0;
+    text-align: center;
+  }
+
+  h2 {
+    color: $main-header-background-color;
+    font-size: 1.6em;
+  }
+
+  h3 {
+    font-size: 1.2em;
+  }
+
+  h2 + h3 {
+    margin-top: 0.5em;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a[href] {
+    color: #66f;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  p {
+    margin: 0.5em 0 0.5em 0;
+  }
+
+  .tagline {
+    font-style: italic;
+    text-align: center;
+  }
+
+  pre {
+    border: 1px solid #abc;
+    font-family: 'Courier New';
+    font-size: 0.85em;
+    overflow: auto;
+    margin: 1.2em 0;
+    padding: 0.6em 0.8em;
+  }
+
+  ul, ol {
+    padding-left: 2em;
+  }
+
+  li {
+    margin: 0.25em 0;
+  }
 }
