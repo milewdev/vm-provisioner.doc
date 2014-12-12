@@ -1,3 +1,3 @@
 ###vm-provisioner.doc
 
-[Online documentation](http://milewdev.github.io/vm-provisioner.doc/) for [vm-provisioner](https://github.com/milewdev/vm-provisioner).
+[Online](http://milewdev.github.io/vm-provisioner.doc/) documentation for [vm-provisioner](https://github.com/milewdev/vm-provisioner).
