@@ -75,9 +75,11 @@
                   <li><a href='#copy_host_file_to_vm'>copy_host_file_to_vm</a></li>
                   <li><a href='#dmg_install'>dmg_install</a></li>
                   <li><a href='#pkg_install'>pkg_install</a></li>
+                  <li><a href='#@run_in_directory'>@run_in_directory</a></li>
                   <li><a href='#run_script'>run_script</a></li>
                   <li><a href='#say'>say</a></li>
                   <li><a href='#tar_install'>tar_install</a></li>
+                  <li><a href='#@vagrant_config'>@vagrant_config</a></li>
                   <li><a href='#zip_install'>zip_install</a></li>
                 </ul>
               </li>
@@ -149,9 +151,9 @@ end
           <article>
             <h2><a id='Installation'>Installation</a></h2>
             <p>
-              vm_provisioner will install itself each time
-              Vagrant runs a Vagrantifile that references it.
-              However, these are the prerequisits for using it:
+              vm_provisioner installs itself each time Vagrant runs a
+              Vagrantifile that references it. However, these are the
+              prerequisits for using it:
             </p>
             <ul>
               <li><a href='http://www.vagrantup.com'>Vagrant</a> must be installed on the host machine.</li>
@@ -319,6 +321,19 @@ with vagrant_config do
     bundle_install
     npm_install
   <b>end</b>
+end
+</pre>
+            <p>
+              <b>Warning</b>: cd cannot be nested:
+            </p>
+<pre>
+with vagrant_config do
+  cd 'somewhere' do
+    cd 'somewhere/else' do
+      ...
+    end
+    # Whoops! back at ~, not 'somewhere'
+  end
 end
 </pre>
           </article>
@@ -524,7 +539,7 @@ end
               href='#homebrew'>Homebrew</a> must be installed beforehand. During
               installation <a
               href='http://www.postgresql.org/docs/9.3/static/app-initdb.html'>initdb</a>
-              will be called, and the database will be set up to start when user
+              is called, and the database is set up to start when user
               <i>vagrant</i> logs in.
             </p>
 <pre>
@@ -735,7 +750,7 @@ $ git clone https://github.com/milewdev/vm-provisioner.git ~/work/vm-provisioner
               out into smaller classes.
             </p>
             <p>
-              A Vagrantfile will bootstrap vm-provisioner by downloading
+              A Vagrantfile bootstraps vm-provisioner by downloading
               Provisioner.rb from github and then invoking the <a
               href='https://github.com/milewdev/vm-provisioner/blob/v2/Provisioner.rb#L6'>Provisioner.provision</a>
               class method, i.e. the code entry point:
@@ -824,10 +839,10 @@ class Provisioner
 end
 </pre>
             <p>
-              The <i>say</i> method prints a header line in the terminal window
-              where Vagrant is run from.  This simply helps to delimit one
-              provisioning step from another which can be helpful when debugging
-              errors, slow downloads, etc.
+              The <a href=#say>say</a> method prints a header line in the
+              terminal window where Vagrant is run from.  This simply helps to
+              delimit one provisioning step from another which can be helpful
+              when debugging errors, slow downloads, etc.
             </p>
 <pre>
 ...
@@ -862,19 +877,287 @@ end
 
           <article>
             <h2><a id='API Reference'>API Reference</a></h2>
-            <h3><a id='copy_host_file_to_vm'>copy_host_file_to_vm</a></h3>
+            <h3><a id='copy_host_file_to_vm'>copy_host_file_to_vm <i>host_path, vm_path</i></a></h3>
             <p>
+              Copy the file <i>host_path</i> from the host machine to
+              <i>vm_path</i> on the virtual machine.
             </p>
 <pre>
+def install_git(version = '2.0.1')
+  say "Installing git and copying .gitconfig from vm host"
+  dmg_install "http://sourceforge.net/projects/git-osx-installer/files/git-#{version}-intel-universal-snow-leopard.dmg/download?use_mirror=autoselect"
+  <b>copy_host_file_to_vm "~/.gitconfig", ".gitconfig"</b>
+end
+</pre>
+            <p>
+              copy_host_file_to_vm is shorthand for Vagrant's <a
+              href='https://docs.vagrantup.com/v2/provisioning/file.html'>config.vm.provision
+              'file'</a> command.  The example above could be written as:
+            </p>
+<pre>
+def install_git(version = '2.0.1')
+  say "Installing git and copying .gitconfig from vm host"
+  dmg_install "http://sourceforge.net/projects/git-osx-installer/files/git-#{version}-intel-universal-snow-leopard.dmg/download?use_mirror=autoselect"
+  <b>@vagrant_config.vm.provision 'file', source: '~/.gitconfig', destination: '.gitconfig'</b>
+end
 </pre>
           </article>
 
           <article>
-            <h3><a id=''></a></h3>
+            <h3><a id='dmg_install'>dmg_install <i>url_of_dmg_file</i></a></h3>
             <p>
+              Install a <a
+              href='http://en.wikipedia.org/wiki/Apple_Disk_Image'>dmg</a> file
+              located at url_of_dmg_file.
             </p>
 <pre>
+def install_chrome
+  say 'Installing google chrome browser'
+  <b>dmg_install 'https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg'</b>
+end
 </pre>
+            <p>
+              If the dmg file contains one file with the extension .pkg or .mpkg
+              then the file is installed using <a
+              href='http://en.wikipedia.org/wiki/Installer_(OS_X)'>installer</a>.
+              If the dmg file contains one directory with the extension .app
+              then the directory is copied to /Applications.
+            </p>
+          </article>
+
+          <article>
+            <h3><a id='pkg_install'>pkg_install <i>url_of_pkg_file</i></a></h3>
+            <p>
+              Install a <a href='http://en.wikipedia.org/wiki/.pkg'>pkg</a> file
+              located at url_of_pkg_file.
+            </p>
+<pre>
+def install_heroku_toolbelt
+  say 'Installing Heroku Toolbelt'
+  <b>pkg_install 'https://toolbelt.heroku.com/download/osx'</b>
+end
+</pre>
+            <p>
+              The pkg file is installed using <a
+              href='http://en.wikipedia.org/wiki/Installer_(OS_X)'>installer</a>.
+            </p>
+          </article>
+
+          <article>
+            <h3><a id='@run_in_directory'>@run_in_directory</a></h3>
+            <p>
+              Contains the name of the directory where <a
+              href='#run_script'>run_script</a> is run. This is the value of
+              'path' passed to <a href='#cd'>cd</a> when inside of the cd block,
+              or /Users/vagrant otherwise.
+            </p>
+<pre>
+with vagrant_config do
+  # @run_in_directory = '/Users/vagrant'
+  cd '/tmp' do
+    # @run_in_directory = '/tmp'
+  end
+  # @run_in_directory = '/Users/vagrant'
+end
+</pre>
+          </article>
+
+          <article>
+            <h3><a id='run_script'>run_script <i>script_code</i></a></h3>
+            <p>
+              Run script_code on the virtual machine in the current directory.
+            </p>
+<pre>
+def bundle_install
+  say "Running 'bundle install'"
+  <b>run_script "bundle install"</b>
+end
+</pre>
+            <p>
+              run_script is shorthand for Vagrant's <a
+              href='https://docs.vagrantup.com/v2/provisioning/shell.html'>config.vm.provision
+              'shell'</a> command.  The example above could be written as:
+            </p>
+<pre>
+def bundle_install
+  say "Running 'bundle install'"
+  <b>@vagrant_config.vm.provision :shell, privileged: false, inline: <<-"EOF"
+    pushd #{@run_in_directory} > /dev/null
+    #{script_code}
+    popd > /dev/null
+  EOF</b>
+end
+</pre>
+            <p>
+              Note that the current directory (@run_in_directory) is normally
+              /User/vagrant, but it can be changed temporarily using the <a
+              href='#cd'>cd</a> command. For example, suppose we have the
+              following provisioning method:
+            </p>
+<pre>
+def pwd
+  puts @run_in_directory
+end
+</pre>
+            <p>
+              This Vagrantfile snippit shows the effect of the cd command
+              on @run_in_directory:
+            </p>
+<pre>
+with vagrant_config do
+  pwd                   # /Users/vagrant
+  cd '/tmp' do
+    pwd                 # /tmp
+  end
+  pwd                   # /Users/vagrant
+end
+</pre>
+          </article>
+
+          <article>
+            <h3><a id='say'>say</a></h3>
+            <p>
+              Prints a header line in the terminal window where Vagrant is run
+              from.  This simply helps to delimit one provisioning step from
+              another and is intended as an aid for debugging errors,
+              identifying slow downloads, etc.
+            </p>
+            <p>
+              For example, suppose we have defined the following utility methods:
+            </p>
+<pre>
+def got_here
+  say 'got here'
+  puts 'got here too'
+end
+
+def got_there
+  say 'got there'
+  puts 'got there too'
+end
+</pre>
+            <p>
+              And we include the following in our Vagrantfile:
+            </p>
+<pre>
+with vagrant_config do
+  got_here
+  got_there
+end
+</pre>
+            <p>
+              Then running vagrant up results in:
+            </p>
+<pre>
+$ vagrant up --provider=vmware_fusion
+...
+--------------- got here ---------------
+got here too
+--------------- got there ---------------
+got there too
+...
+$
+</pre>
+          </article>
+
+          <article>
+            <h3><a id='tar_install'>tar_install <i>url_of_tar_file</i></a></h3>
+            <p>
+              Install a <a
+              href='http://en.wikipedia.org/wiki/Tar_(computing)'>tar</a> file
+              located at url_of_tar_file.
+            </p>
+<pre>
+def install_textmate
+  say "Installing TextMate"
+  <b>tar_install 'https://api.textmate.org/downloads/release'</b>
+end
+</pre>
+            <p>
+              The contents of the tar file are simply extracted to /Applications.
+            </p>
+          </article>
+
+          <article>
+            <h3><a id='@vagrant_config'>@vagrant_config</a></h3>
+            <p>
+              The vagrant config instance that was passed to Provisioner.provision.
+              Here is the entire trail of the vagrant configuration, starting with
+              the Vagrantfile:
+            </p>
+<pre>
+Vagrant.configure(API_VERSION) do |<b>vagrant_config</b>|
+  with <b>vagrant_config</b> do
+    ls
+  end
+end
+
+def with(<b>vagrant_config</b>, &block)
+  require "open-uri"
+  File.write "Provisioner.rb", open(PROVISIONER_URL).read
+  require_relative "Provisioner"
+  Provisioner.provision(<b>vagrant_config</b>, &block)
+  File.delete "Provisioner.rb"
+end
+</pre>
+            <p>
+              And inside Provisioner.rb we may have something like:
+            </p>
+<pre>
+class Provisioner
+
+    def self.provision(<b>vagrant_config</b>, &block)
+      Provisioner.new(<b>vagrant_config</b>).send(:run, &block)
+    end
+
+  private
+
+    def initialize(<b>vagrant_config</b>)
+      <b>@vagrant_config</b> = <b>vagrant_config</b>
+      @run_in_directory = @run_in_directory_default = '.'
+    end
+
+    ...
+end
+
+...
+
+class Provisioner
+  def ls
+    run_script 'ls'
+  end
+end
+
+...
+
+class Provisioner
+  def run_script(script_code)
+    <b>@vagrant_config</b>.vm.provision :shell, privileged: false, inline: <<-"EOF"
+      pushd #{@run_in_directory} > /dev/null
+      #{script_code}
+      popd > /dev/null
+    EOF
+  end
+end
+</pre>
+          </article>
+
+          <article>
+            <h3><a id='zip_install'>zip_install <i>url_of_zip_file</i></a></h3>
+            <p>
+              Install a <a
+              href='http://en.wikipedia.org/wiki/Zip_(file_format)'>zip</a> file
+              located at url_of_zip_file.
+            </p>
+<pre>
+def install_atom
+  say "Installing atom editor"
+  <b>zip_install 'https://atom.io/download/mac'</b>
+end
+</pre>
+            <p>
+              The contents of the zip file are simply extracted to /Applications.
+            </p>
           </article>
         </section>
       </div>

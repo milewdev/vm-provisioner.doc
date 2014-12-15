@@ -111,6 +111,8 @@ section.main {
     font-size: 1.2em; }
   section.main h2 + h3 {
     margin-top: 0.5em; }
+  section.main h3 i {
+    font-weight: normal; }
   section.main a {
     color: inherit;
     text-decoration: none; }
